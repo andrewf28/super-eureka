@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         Thread gameThread = null;
         SurfaceHolder ourHolder;
         volatile boolean playing;
-        boolean paused = true;
+        boolean paused = false;
         Canvas canvas;
         Paint paint;
         int y;
@@ -219,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
     }
     private void drawSpaceship(Canvas canvas, int width, int height, float rotation) {
         Paint spaceshipPaint = new Paint();
-        spaceshipPaint.setColor(Color.WHITE);
+        spaceshipPaint.setColor(Color.GREEN);
         spaceshipPaint.setStyle(Paint.Style.FILL);
 
         int centerX = width / 2;
