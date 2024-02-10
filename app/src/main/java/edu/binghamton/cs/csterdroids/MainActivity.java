@@ -14,6 +14,9 @@ import android.view.SurfaceView;
 import android.graphics.Path;
 
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 
 
@@ -45,7 +48,35 @@ public class MainActivity extends AppCompatActivity {
         int height, width;
         boulder[] b;
 
+        List<Bullet> bullets = new ArrayList<>();
+
+
         private long thisTimeFrame;
+        class Bullet {
+            float x, y; // Bullet's position
+            float speedX, speedY; // Bullet's speed in X and Y direction
+
+            public Bullet(float startX, float startY, float targetX, float targetY) {
+                this.x = startX;
+                this.y = startY;
+
+                // Calculate direction
+                float angle = (float) Math.atan2(targetY - startY, targetX - startX);
+                float bulletSpeed = 20; // Adjust this value as needed
+                this.speedX = (float) Math.cos(angle) * bulletSpeed;
+                this.speedY = (float) Math.sin(angle) * bulletSpeed;
+            }
+
+            public void update() {
+                x += speedX;
+                y += speedY;
+            }
+
+            public void draw(Canvas canvas, Paint paint) {
+                canvas.drawCircle(x, y, 10, paint); // Draw the bullet as a simple circle
+            }
+        }
+
         public AsteroidView(Context context) {
             super(context);
 
@@ -81,6 +112,17 @@ public class MainActivity extends AppCompatActivity {
                 b[i].dy = r.nextInt(30) - 15;
                 b[i].diameter = 95;
             }
+            for (Iterator<Bullet> iterator = bullets.iterator(); iterator.hasNext();) {
+                Bullet bullet = iterator.next();
+                bullet.update();
+                // Remove bullets if they go off-screen for performance
+                if (bullet.x < 0 || bullet.x > width || bullet.y < 0 || bullet.y > height) {
+                    iterator.remove();
+                } else {
+                    bullet.draw(canvas, paint);
+                }
+            }
+
 
 
             while (playing)
@@ -172,27 +214,35 @@ public class MainActivity extends AppCompatActivity {
             int action = motionEvent.getAction();
             switch (action) {
                 case MotionEvent.ACTION_DOWN:
+                    // Fire a bullet
+                    float downX = motionEvent.getX();
+                    float downY = motionEvent.getY();
+
+                    // Assuming the spaceship's center as the bullet's starting point
+                    Bullet bullet = new Bullet(width / 2, height / 3, downX, downY); // Adjust if your spaceship's position is different
+                    bullets.add(bullet);
+                    break;
                 case MotionEvent.ACTION_MOVE:
-                    // Get the touch coordinates
-                    float touchX = motionEvent.getX();
-                    float touchY = motionEvent.getY();
+                    // Calculate the new angle for spaceship rotation
+                    float moveX = motionEvent.getX();
+                    float moveY = motionEvent.getY();
 
-                    // Calculate the angle
-                    float deltaX = touchX - (width / 2); // Assuming spaceship is at the center of the screen
+                    // Invert deltaY by subtracting the touch position from the spaceship position
+                    float deltaX = moveX - (width / 2); // Assuming spaceship is centered horizontally
+                    float deltaY = (height / 3) - moveY; // Assuming part of spaceship positioning, adjust as necessary
 
-                    // Inverting deltaY calculation
-                    float deltaY = touchY - (height / 3); // Adjusted to invert the deltaY
-
-                    // Updated angle calculation
-                    spaceshipRotation = (float) Math.toDegrees(Math.atan2(deltaY, deltaX)) + 90; // Add 90 to correct the direction
+                    // Adjust the rotation angle. Inverting deltaY might remove the need for additional adjustments
+                    spaceshipRotation = - (float) Math.toDegrees(Math.atan2(deltaY, deltaX)) + 90;
 
                     break;
+
                 case MotionEvent.ACTION_UP:
-                    // Optionally handle touch release
+                    // Optionally handle touch release, if there's any need to stop actions or reset states
                     break;
             }
-            return true;
+            return true; // Indicates that the method has handled the touch event
         }
+
 
 
 
