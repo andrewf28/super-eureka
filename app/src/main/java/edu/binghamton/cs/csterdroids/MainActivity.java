@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
             return path;
         }
 
+
         @Override
         public void run() {
             Random r = new Random();
@@ -165,35 +166,35 @@ public class MainActivity extends AppCompatActivity {
             gameThread.start();
         }
 
+
         @Override
         public boolean onTouchEvent(MotionEvent motionEvent) {
             int action = motionEvent.getAction();
-            float touchX = motionEvent.getX();
-
             switch (action) {
                 case MotionEvent.ACTION_DOWN:
                 case MotionEvent.ACTION_MOVE:
-                    // Check if the touch is on the left or right side of the screen
-                    if (touchX < getWidth() / 2) {
-                        rotatingLeft = true;
-                        rotatingRight = false;
-                        Log.d("TouchEvent", "Touching Left Side");
-                    } else {
-                        rotatingRight = true;
-                        rotatingLeft = false;
-                        Log.d("TouchEvent", "Touching Right Side");
-                    }
+                    // Get the touch coordinates
+                    float touchX = motionEvent.getX();
+                    float touchY = motionEvent.getY();
+
+                    // Calculate the angle
+                    float deltaX = touchX - (width / 2); // Assuming spaceship is at the center of the screen
+
+                    // Inverting deltaY calculation
+                    float deltaY = touchY - (height / 3); // Adjusted to invert the deltaY
+
+                    // Updated angle calculation
+                    spaceshipRotation = (float) Math.toDegrees(Math.atan2(deltaY, deltaX)) + 90; // Add 90 to correct the direction
+
                     break;
                 case MotionEvent.ACTION_UP:
-                    // Stop rotating when the touch is released
-                    rotatingLeft = false;
-                    rotatingRight = false;
-                    Log.d("TouchEvent", "Touch Released");
+                    // Optionally handle touch release
                     break;
             }
-            Log.d("TouchEvent", "rotatingLeft: " + rotatingLeft + ", rotatingRight: " + rotatingRight);
             return true;
         }
+
+
 
 
 
@@ -219,8 +220,12 @@ public class MainActivity extends AppCompatActivity {
     }
     private void drawSpaceship(Canvas canvas, int width, int height, float rotation) {
         Paint spaceshipPaint = new Paint();
-        spaceshipPaint.setColor(Color.GREEN);
+        spaceshipPaint.setColor(Color.GREEN); // Color for the main body of the spaceship
         spaceshipPaint.setStyle(Paint.Style.FILL);
+
+        Paint tipPaint = new Paint();
+        tipPaint.setColor(Color.RED); // Color for the tip of the spaceship
+        tipPaint.setStyle(Paint.Style.FILL);
 
         int centerX = width / 2;
         int centerY = height / 3;
@@ -228,15 +233,25 @@ public class MainActivity extends AppCompatActivity {
         canvas.save();
         canvas.rotate(rotation, centerX, centerY);
 
-        Path path = new Path();
-        path.moveTo(centerX, centerY - 50);
-        path.lineTo(centerX - 50, centerY + 50);
-        path.lineTo(centerX + 50, centerY + 50);
-        path.close();
+        // Draw the main body of the spaceship
+        Path bodyPath = new Path();
+        bodyPath.moveTo(centerX, centerY - 30); // Move a bit down from the tip to make the tip noticeable
+        bodyPath.lineTo(centerX - 50, centerY + 50);
+        bodyPath.lineTo(centerX + 50, centerY + 50);
+        bodyPath.close();
+        canvas.drawPath(bodyPath, spaceshipPaint);
 
-        canvas.drawPath(path, spaceshipPaint);
+        // Draw the tip of the spaceship
+        Path tipPath = new Path();
+        tipPath.moveTo(centerX, centerY - 50); // Tip point
+        tipPath.lineTo(centerX - 10, centerY - 30); // Connect to the body - left side
+        tipPath.lineTo(centerX + 10, centerY - 30); // Connect to the body - right side
+        tipPath.close();
+        canvas.drawPath(tipPath, tipPaint);
+
         canvas.restore();
     }
+
 
 
 }
