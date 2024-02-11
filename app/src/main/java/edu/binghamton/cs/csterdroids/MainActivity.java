@@ -112,16 +112,16 @@ public class MainActivity extends AppCompatActivity {
                 b[i].dy = r.nextInt(30) - 15;
                 b[i].diameter = 95;
             }
-            for (Iterator<Bullet> iterator = bullets.iterator(); iterator.hasNext();) {
-                Bullet bullet = iterator.next();
-                bullet.update();
-                // Remove bullets if they go off-screen for performance
-                if (bullet.x < 0 || bullet.x > width || bullet.y < 0 || bullet.y > height) {
-                    iterator.remove();
-                } else {
-                    bullet.draw(canvas, paint);
-                }
-            }
+//            for (Iterator<Bullet> iterator = bullets.iterator(); iterator.hasNext();) {
+//                Bullet bullet = iterator.next();
+//                bullet.update();
+//                // Remove bullets if they go off-screen for performance
+//                if (bullet.x < 0 || bullet.x > width || bullet.y < 0 || bullet.y > height) {
+//                    iterator.remove();
+//                } else {
+//                    bullet.draw(canvas, paint);
+//                }
+//            }
 
 
 
@@ -160,6 +160,15 @@ public class MainActivity extends AppCompatActivity {
                 spaceshipRotation += 5;
                 Log.d("Update", "Rotating Right: " + spaceshipRotation);
             }
+            Iterator<Bullet> iterator = bullets.iterator();
+            while (iterator.hasNext()) {
+                Bullet bullet = iterator.next();
+                bullet.update();
+                // Remove bullets that go off-screen
+                if (bullet.x < 0 || bullet.x > width || bullet.y < 0 || bullet.y > height) {
+                    iterator.remove();
+                }
+            }
 
         }
         public void draw() {
@@ -184,6 +193,10 @@ public class MainActivity extends AppCompatActivity {
                     b[i].width = width;
                     b[i].height = height;
                     b[i].draw(canvas, paint);
+                }
+                paint.setColor(Color.WHITE); // Set bullet color
+                for (Bullet bullet : bullets) {
+                    bullet.draw(canvas, paint);
                 }
 
                 // canvas.drawCircle(b.x, b.y, 50, paint);
